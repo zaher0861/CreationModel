@@ -60,8 +60,25 @@ namespace CreationModelPlugin
             {
                 AddWindow(doc, level1, walls[i]);
             }
-
+            AddRoof(doc, level2, walls);
             transaction.Commit();
+        }
+
+        private void AddRoof(Document doc, Level level2, List<Wall> walls)
+        {
+            RoofType roofType = new FilteredElementCollector(doc) 
+                .OfClass(typeof(RoofType))
+                .OfType<RoofType>()
+                .Where(x => x.Name.Equals("Типовой - 400мм"))
+                .Where(x => x.FamilyName.Equals("Базовая крыша"))
+                .FirstOrDefault();
+
+            CurveArray curveArray = new CurveArray();
+            curveArray.Append(Line.CreateBound(new XYZ(-20, -10, 13), new XYZ(-20, 0, 20)));
+            curveArray.Append(Line.CreateBound(new XYZ(-20, 0, 20), new XYZ(-20, 10, 13)));
+
+            ReferencePlane plane = doc.Create.NewReferencePlane(new XYZ(0, 0, 0), new XYZ(0, 0, 20), new XYZ(0, 20, 0), doc.ActiveView);
+            doc.Create.NewExtrusionRoof(curveArray, plane, level2, roofType, -19, 19);
         }
 
         private void AddWindow(Document doc, Level level1, Wall wall)
